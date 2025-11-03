@@ -4,6 +4,8 @@ import { ref, onMounted, watch, onUnmounted} from 'vue'
 import TrainWords from '@/components/TrainWordsCard.vue'
 import UnknownWords from '@/components/UnknownWordsCard.vue'
 import Word from '@/components/Word.vue'
+import {loadProgress, getProgress, saveProgress} from '../utils/progressStorage'
+import {getKnownWord} from '../utils/api'
 
 //  --СОСТОЯНИЯ--
 const hasVisitedBefore = ref(false)
@@ -15,11 +17,12 @@ onMounted(() => {loadWords()})
 
 //  --МЕТОДЫ--
 
-const loadWords = () => {
+const loadWords = async () => {
     const saved = localStorage.getItem('lernWord');
     if (saved) {
+        console.log(saved)
         wordList.value = JSON.parse(saved);
-        getProgress();
+        wordList.value = await loadProgress(wordList.value);
         hasVisitedBefore.value = false;
     } else {
         hasVisitedBefore.value = true;
@@ -37,49 +40,18 @@ const start = () => {
     startTrain.value = true
 }
 
-const loadProgress = () => {
-    try {
-        return JSON.parse(localStorage.getItem('progressWords')) || [];
-    } catch (error) {
-        return [];
-    }
-}
-
-const getProgress = () => {
-    wordList.value = wordList.value.map((item) => {
-        const progressItem = loadProgress().find((progress) => {
-            return progress.id === item._id
-        })
-        return {...item, progress:  progressItem ? progressItem.progress : 0}
-    })   
-}
-
-const saveProgress = (words) => {
-    return localStorage.setItem('progressWords', JSON.stringify(words))
-}
-
 const handleSaveWords = async (words) => {
-    const response = await fetch(`http://localhost:3000/word/known`, {
-        method: "post",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            ids: words
-        })
-    });
-    wordList.value = await response.json();
+    wordList.value = await getKnownWord(words)
 
     localStorage.setItem('lernWord', JSON.stringify(wordList.value));
     hasVisitedBefore.value = false;
 
-    getProgress();
+    wordList.value = await loadProgress(wordList.value);
 }
 
 const handleSaveProgress = (WordIds) => {
     const result = WordIds.map((item) => {
-        const progressItem = loadProgress().find((progress) => {
+        const progressItem = getProgress().find((progress) => {
             return progress.id === item
         })
 

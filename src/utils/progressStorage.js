@@ -18,3 +18,11 @@ export const loadProgress = (wordList) => {
 export const saveProgress = (words) => {
     return localStorage.setItem('progressWords', JSON.stringify(words))
 }
+
+export const getProgressIds = () => {
+    return getProgress().map(item => item.id);
+}
+
+export const getIncompleteProgressIds = () => {
+    return getProgress().filter(item => item.progress < 100).map(item => item.id);
+}

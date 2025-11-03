@@ -1,8 +1,8 @@
 <script setup>
 //  --ИМПОРТЫ--
 import { ref, onMounted, computed } from 'vue'
-import {getProgress, saveProgress} from '../utils/progressStorage'
-import {getAllWords} from '../utils/api'
+import {getProgress, saveProgress, getIncompleteProgressIds, getProgressIds} from '../utils/progressStorage'
+import {getUnknownWord} from '../utils/api'
 
 const emit = defineEmits(['save-words'])
 
@@ -28,29 +28,11 @@ onMounted(async () => {
 }); 
 
 //  --МЕТОДЫ--
-const getCompletedWordIds = () => {
-    return getProgress().filter(item => item.progress === 100).map(item => item.id);
-}
-
-const excludedIds = () => {
-    return [...getCompletedWordIds(), ...unknownWords.value];
-}
 
 const fetchWords = async () => {
-    const response = await fetch(`http://localhost:3000/word/unknown/${MAX_AMOUNT_UNKNOWN_WORD}`, {
-        method: "post",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            ids: excludedIds()
-        })
-    });
-    
-    bufWords.value = await response.json();
+    bufWords.value = await getUnknownWord([...getProgressIds(), ...unknownWords.value], MAX_AMOUNT_UNKNOWN_WORD);
     if(bufWords.value.length == 0) {
-        emit('save-words', [...unknownWords.value, ...getCompletedWordIds()])
+        emit('save-words', [...unknownWords.value, ...getIncompleteProgressIds()])
         return 0;
     }
     console.log(bufWords.value);
@@ -85,7 +67,7 @@ const know = async () => {
 const unknown = async () => {   
     unknownWords.value.push(bufWords.value[counterWord.value]._id)
     if (unknownWords.value.length >= 3) {
-       emit('save-words', [...unknownWords.value, ...getCompletedWordIds()])
+       emit('save-words', [...unknownWords.value, ...getIncompleteProgressIds()])
     }
     counterWord.value++;
     await nextWord();
