@@ -4,7 +4,7 @@ import { ref, onMounted, watch, onUnmounted} from 'vue'
 import TrainWords from '@/components/TrainWordsCard.vue'
 import UnknownWords from '@/components/UnknownWordsCard.vue'
 import Word from '@/components/Word.vue'
-import {loadProgress, getProgress, saveProgress} from '../utils/progressStorage'
+import {loadProgress, getProgress, saveProgress, addProgress} from '../utils/progressStorage'
 import {getKnownWord} from '../utils/api'
 
 //  --СОСТОЯНИЯ--
@@ -20,7 +20,6 @@ onMounted(() => {loadWords()})
 const loadWords = async () => {
     const saved = localStorage.getItem('lernWord');
     if (saved) {
-        console.log(saved)
         wordList.value = JSON.parse(saved);
         wordList.value = await loadProgress(wordList.value);
         hasVisitedBefore.value = false;
@@ -42,29 +41,13 @@ const start = () => {
 
 const handleSaveWords = async (words) => {
     wordList.value = await getKnownWord(words)
-
     localStorage.setItem('lernWord', JSON.stringify(wordList.value));
     hasVisitedBefore.value = false;
-
     wordList.value = await loadProgress(wordList.value);
 }
 
 const handleSaveProgress = (WordIds) => {
-    const result = WordIds.map((item) => {
-        const progressItem = getProgress().find((progress) => {
-            return progress.id === item
-        })
-
-        if(progressItem) {
-            progressItem.progress += 10
-            return progressItem
-        } else {
-            return {id:item, progress: 10}
-        }
-        
-    })
-    saveProgress(result)
-
+    addProgress(WordIds)
     localStorage.removeItem('lernWord')
     hasVisitedBefore.value = true
     startTrain.value = false
@@ -76,15 +59,16 @@ const handleSaveProgress = (WordIds) => {
     <UnknownWords v-if = " hasVisitedBefore" @save-words="handleSaveWords"/>
     <div class="trining" v-if = "!hasVisitedBefore">
         <div class="wordList" v-if = "!startTrain">
-            <Word
-                v-for="(item, index) in wordList"
-                :todo="item"
-                :key="index"
-                :class="{ odd: index % 2 !== 0 }"
-            />
+                <div class="word-list">
+        <Word
+            v-for="(item, index) in wordList"
+            :todo="item"
+            :key="index"
+        />
+    </div>
             <div class="continueCancel">
-                <button class="cancel" @click="cancel">Отмена</button>
-                <button class="start" @click="start">Продолжить</button>
+                <button class=" button" @click="cancel">Отмена</button>
+                <button class="start primary-button" @click="start">Продолжить</button>
             </div>
         </div>
         <TrainWords v-if = "startTrain"  @save-progress="handleSaveProgress"/> 
@@ -99,8 +83,11 @@ const handleSaveProgress = (WordIds) => {
 .train-card{
     margin-left: auto;
     margin-right: auto;
-    width: 30em;
+    max-width: 30em;
     text-align: center;
+    background-color: hsl(var(--card));
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border));
 }
 .score{
     padding: 1em;
@@ -133,7 +120,19 @@ const handleSaveProgress = (WordIds) => {
     text-align: center;
 }
 .continueCancel>*{
-    margin: 1em;
+    margin: 1rem;
+    width: 10rem;
 }
 
+.word-list {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+}
+
+.word-list > * + * {
+  border-top: 1px solid hsl(var(--border));
+}
 </style>

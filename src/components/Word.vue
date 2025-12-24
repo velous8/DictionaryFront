@@ -6,36 +6,32 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="word">
+    <div class="word-data">
+      <div class="word">
         <div class = "eng">{{ todo.eng }}</div>
-        <div class = "transcription">|{{ todo.transcription }}|</div>
-        <div class = "translation">{{ todo.translation }}</div>
-        <div class = "progress">({{ todo.progress || '0'}}%)</div>
+        <div class = "transcription">[{{ todo.transcription }}]</div>
+        <div class = "translation">{{ todo.translation }}</div> 
+      </div>
+        
+      <div class = "progress">({{ todo.progress || '0'}}%)</div>     
     </div>
+    
 </template>
 
 <style scoped>
-.word{
-  margin: 0 100px;
+.word-data{
   display: flex;
+  align-items: center;
   justify-content: space-between;
-}
-.word>*{
-  padding: 0 1.25%;
-   border-left: 1px dashed;
-   border-right: 1px dashed;
+  text-align: left;
+  padding: 0.75rem 1rem;
 }
 .eng{
-  min-width: 25%;
+  font-weight: bold
 }
 .transcription{
-  min-width: 25%;
-}
-.translation{
-  min-width: 30%;
-}
-.progress{
-  min-width: 10%;
-  text-align:center;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: hsl(var(--muted-foreground))
 }
 </style>

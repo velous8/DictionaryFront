@@ -31,3 +31,10 @@ export const getUnknownWord = async (ids, amount) => {
     
     return response.json();
 }
+
+
+export const getAmountWord = async () => {
+    const response = await fetch('http://localhost:3000/word/amount')
+    return await response.json();
+
+}

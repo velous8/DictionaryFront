@@ -1,44 +1,125 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import Word from '../components/Word.vue'
 import {loadProgress} from '../utils/progressStorage'
 import {getAllWords} from '../utils/api'
 
+import castmSelect from '@/components/castmSelect.vue'
+
 const wordList = ref(null);
+const selectedFilter = ref('Все') 
+const selectedSort = ref('A-Z')   
+
 
 onMounted(async () => {
     wordList.value = await getAllWords();
     wordList.value = await loadProgress(wordList.value);
 }); 
+
+const filteredWords = computed(() => {
+  if (!wordList.value) return []
+  
+  let filtered = [...wordList.value]
+  
+  switch (selectedFilter.value) {
+    case 'Незнакомые':
+      filtered = filtered.filter(item => item.progress === 0)
+      break
+    case 'Изучаемые':
+      filtered = filtered.filter(item => item.progress > 0 && item.progress < 100)
+      break
+    case 'Выученные':
+      filtered = filtered.filter(item => item.progress === 100)
+      break
+  }
+  
+  switch (selectedSort.value) {
+    case 'A-Z':
+      filtered.sort((a, b) =>(a > b ? -1 : 1))
+      break
+    case 'Z-A':
+      filtered.sort((a, b) => (a > b ? 1 : -1))
+      break
+  }
+  
+  return filtered
+})
 </script>
 
 <template>
-        <form class="filter" id="search">
-            <input name="query" v-model="searchQuery" placeholder="Поиск">
-            <select>
-                <option value="1">A-Z</option>
-                <option value="2">А-Я</option>
-                <option value="3">%</option>
-            </select>
+    <div class="direction">
+    <div class="filter">
+        <form class="filter-selecter" id="search">
+            <castmSelect
+            v-model="selectedFilter"
+            :options="[
+              'Все',
+              'Незнакомые',
+              'Изучаемые',
+              'Выученные'
+            ]"></castmSelect>
+
+            <castmSelect 
+            v-model="selectedSort"
+            :options="[
+              'A-Z',
+              'Z-A',
+            ]"></castmSelect>
         </form>
+
+        <div class="count-words">{{ filteredWords.length }} слов</div>
+    </div>
     <div class="word-list">
         <Word
-            v-for="(item, index) in wordList"
+            v-for="(item, index) in filteredWords"
             :todo="item"
             :key="index"
-            :class="{ odd: index % 2 !== 0 }"
         />
+    </div>
     </div>
 </template>
 
 <style scoped>
-.odd>*{
-    background-color: #a8dadc;
+.direction{
+    display: flex; 
+    flex-direction: column;
+    gap: 1rem;
 }
+
 .filter{
-    margin-left: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
-.filter>*{
-    margin: 1em;
+
+.filter-selecter{
+    display: flex;
+    gap: 0.5rem;
 }
+@media (max-width: 640px) {
+  .filter {
+    gap: 0.5rem;
+      flex-direction: column;
+      align-items: stretch;
+  }
+}
+
+.count-words{
+    font-size: .875rem;
+    color: hsl(var(--muted-foreground));
+}
+
+.word-list {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+}
+
+.word-list > * + * {
+  border-top: 1px solid hsl(var(--border));
+}
+
+
 </style>
