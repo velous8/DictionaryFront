@@ -1,35 +1,76 @@
-# dictionary
+# Dictionary Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Frontend для приложения по изучению английских слов.
 
-## Recommended IDE Setup
+Приложение предоставляет интерфейс для авторизации пользователей, работы со словарём и изучения слов с отслеживанием прогресса.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Стек
 
-## Customize configuration
+* **Vue 3**
+* **JavaScript**
+* **ESLint**
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Основные возможности
 
-## Project Setup
+* Регистрация и авторизация пользователей
+* Работа с аккаунтом пользователя
+* Просмотр словаря
+* Изучение английских слов
+* Работа с неизвестными и изучаемыми словами
+* Отслеживание прогресса изучения
+* Взаимодействие с backend API
 
-```sh
+## Структура проекта
+
+```text
+src/
+├── components/    # UI-компоненты
+├── views/         # Страницы приложения
+├── router/        # Маршрутизация
+├── stores/        # Состояние приложения
+├── services/      # Работа с API
+└── ...
+```
+
+## Запуск проекта
+
+Установить зависимости:
+
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+Запустить development server:
 
-```sh
+```bash
 npm run dev
 ```
 
-### Compile and Minify for Production
+Собрать production-версию:
 
-```sh
+```bash
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+Проверить код:
 
-```sh
+```bash
 npm run lint
 ```
+
+## Backend
+
+Frontend взаимодействует с backend API приложения **Nest Dictionary API**.
+
+Backend отвечает за:
+
+* авторизацию и регистрацию;
+* JWT-аутентификацию;
+* работу со словарём;
+* хранение прогресса пользователя;
+* административное управление словами.
+
+## Архитектура
+
+Frontend построен на Vue 3.
+Приложение разделено на страницы, переиспользуемые компоненты, маршрутизацию, управление состоянием и работу с API.
