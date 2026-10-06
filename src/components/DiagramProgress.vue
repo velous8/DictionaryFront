@@ -1,68 +1,67 @@
 <script setup>
-import { Doughnut } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js'
-import { ref, reactive, onMounted, watch } from 'vue'
+import { Doughnut } from "vue-chartjs";
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from "chart.js";
+import { ref, reactive, onMounted } from "vue";
 
-import {getProgress} from '../utils/progressStorage'
-import {getAmountWord} from '../utils/api'
+import { getWordsProgress, getAmountWord } from "../utils/api";
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale)
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
 const chartData = reactive({
-  labels: ['Выученные', 'В изучении', 'Неизвестные'],
+  labels: ["Выученные", "В изучении", "Неизвестные"],
   datasets: [
     {
-      label: 'Прогресс',
-      data: [0, 0, 0], // Начальные нулевые значения
-      backgroundColor: [
-        '#FF6384',
-        '#36A2EB',
-        '#FFCE56'
-      ],
+      label: "Прогресс",
+      data: [0, 0, 0],
+      backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
       borderWidth: 2,
-      borderColor: '#fff',
-      cutout: '50%'
-    }
-  ]
-})
+      borderColor: "#fff",
+      cutout: "50%",
+    },
+  ],
+});
 
 const chartOptions = ref({
   plugins: {
-    legend: {
-      display: false // Полностью отключаем легенду
-    }
-  }
-})
-
+    legend: { display: false },
+  },
+});
 
 onMounted(async () => {
-  await counterWords()
-})
+  await counterWords();
+});
+
 const counterWords = async () => {
-  const progress = getProgress()
-  let learned = 0
-  let studying = 0
+  try {
+    const [progress, totalWords] = await Promise.all([getWordsProgress(), getAmountWord()]);
 
-  progress.forEach((item) => {
-    if (item.progress === 100) {
-      learned++
-    } else {
-      studying++
-    }
-  })
+    let learned = 0; // progress === 100
+    let studying = 0; // 0 < progress < 100
+    let unfamiliar = 0;
 
-  const totalWords = await getAmountWord()
-  const unfamiliar = totalWords - learned - studying
-  
-  chartData.datasets[0].data = [learned, studying, unfamiliar]
-  
-}
+    progress.forEach((item) => {
+      if (item.progress === 100) learned++;
+      else if (item.progress > 0) studying++;
+      else unfamiliar++;
+    });
 
+    // Слова, по которым вообще нет записи прогресса, — тоже неизвестные
+    unfamiliar += totalWords - progress.length;
+
+    chartData.datasets[0].data = [learned, studying, unfamiliar];
+  } catch (e) {
+    console.error("Не удалось загрузить прогресс:", e);
+  }
+};
 </script>
 
 <template>
   <div class="doughnut-chart-container">
-    <Doughnut v-if="chartData.datasets[0].data.some(val => val > 0)" :data="chartData" :options="chartOptions" />
+    <Doughnut
+      v-if="chartData.datasets[0].data.some((val) => val > 0)"
+      :data="chartData"
+      :options="chartOptions"
+    />
     <div v-else class="no-data">Загрузка данных...</div>
   </div>
 </template>
