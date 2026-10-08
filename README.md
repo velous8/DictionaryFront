@@ -104,6 +104,9 @@ Frontend для приложения **LexiDrill** — сервиса для и�
 * редактировать слова;
 * удалять слова.
 
+## Диаграмма последовательности для тренировки
+<img width="831" height="1441" alt="SequenceDiogramDictionaryBack drawio" src="https://github.com/user-attachments/assets/bc1c6d9f-a3b8-42c2-a9a4-fc9ee6e7c1cd" />
+
 
 ## Авторизация
 
