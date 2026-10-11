@@ -133,30 +133,13 @@ Refresh token используется через `httpOnly` cookie backend API.
 При получении `401` API-слой автоматически пытается получить новый access token.
 
 
-## Запуск
+## Установка
 
-Установить зависимости:
-
-```bash
-npm install
 ```
-
-Запустить development server:
-
-```bash
+npm install
 npm run dev
 ```
 
-Собрать production-версию:
-
-```bash
-npm run build
-```
-
-Запустить проверку ESLint:
-
-```bash
-npm run lint
-```
+Перед запуском настройте подключение к backend API при необходимости.
 
 
